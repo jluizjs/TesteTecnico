@@ -51,19 +51,21 @@ begin
     FConexao.SetValue(3, pedido.Total);
     FConexao.ExecSQL;
     SQL := '';
-    for I := 0 to Pred(pedido.itensPedido.Count) do
+
+    for I := 0 to Pred(pedido.ItensPedido.Count) do
     begin
       SQL := 'INSERT INTO PEDIDO_DETALHE (DET_PED_CODIGO, DET_PROD_CODIGO, '+
         'DET_QUANTIDADE, DET_VALOR_UNIT, DET_VALOR_TOTAL) VALUES (?,?,?,?,?)';
       FConexao.PrepareStatement(SQL);
       FConexao.SetValue(0, pedido.itensPedido[I].CodigoPedido);
       FConexao.SetValue(1, pedido.itensPedido[I].CodigoProduto);
-      FConexao.SetValue(2, pedido.itensPedido[I].QuantidadeProduto);
-      FConexao.SetValue(3, pedido.itensPedido[I].ValorUnitProduto);
+      FConexao.SetValue(2, pedido.itensPedido[I].Quantidade);
+      FConexao.SetValue(3, pedido.itensPedido[I].ValorUnit);
       FConexao.SetValue(4, pedido.itensPedido[I].ValorTotal);
       FConexao.ExecSQL
     end;
     FConexao.Commit;
+    DM.cdsDetPedido.EmptyDataSet;
   except
     FConexao.RollBack;
   end;

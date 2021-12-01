@@ -5,19 +5,34 @@ interface
 type
   TModelItensPedido = class
     private
-    FCodigo: Integer;
     FCodigoPedido: Integer;
+    FCodigoProduto: Integer;
     FQuantidade: Double;
-    FValorUnitProduto: Double;
+    FValorUnit: Double;
     FValorTotal: Double;
     public
-      property CodigoPedido:  Integer read FCodigo write FCodigo;
-      property CodigoProduto: Integer read FCodigoPedido write FCodigoPedido;
-      property QuantidadeProduto: Double read FQuantidade write FQuantidade;
-      property ValorUnitProduto:  Double read FValorUnitProduto write FValorUnitProduto;
+      constructor Create;
+      destructor Destroy; override;
+      property CodigoPedido:  Integer read FCodigoPedido write FCodigoPedido;
+      property CodigoProduto: Integer read fCodigoProduto write fCodigoProduto;
+      property Quantidade: Double read FQuantidade write FQuantidade;
+      property ValorUnit:  Double read FValorUnit write FValorUnit;
       property ValorTotal: Double read FValorTotal write FValorTotal;
   end;
 
 implementation
+
+{ TModelItensPedido }
+
+constructor TModelItensPedido.Create;
+begin
+
+end;
+
+destructor TModelItensPedido.Destroy;
+begin
+
+  inherited;
+end;
 
 end.

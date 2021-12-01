@@ -73,7 +73,7 @@ type
     procedure InserirItemPedido();
     procedure LimparCamposItem();
     procedure BuscarProduto(codigo: Integer);
-    procedure GerarPedido(pedido : TModelPedido);
+    procedure GerarPedido();
     procedure CalculcarTotal();
     procedure FinalizarPedido();
   public
@@ -102,16 +102,8 @@ end;
 
 procedure TfrmPrincipal.btnGravarPedidoClick(Sender: TObject);
 begin
-  FControllerPedido := TControllerPedido.Create;
-  FPedido := TModelPedido.Create;
-  try
-    GerarPedido(FPedido);
-    FControllerPedido.GravarPedido(FPedido);
+    GerarPedido();
     FinalizarPedido;
-  finally
-    FControllerPedido.DisposeOf;
-    FPedido.DisposeOf;
-  end;
 end;
 
 procedure TfrmPrincipal.btnInserirItemClick(Sender: TObject);
@@ -206,6 +198,7 @@ begin
   lblCodigoCliente.Caption := '';
   lblNomeCliente.Caption   := '';
   lblCodigoPedido.Caption  := '';
+  lblTotalPedido.Caption  := '';
   pnlProduto.Enabled := False;
 end;
 
@@ -230,11 +223,10 @@ begin
   end;
 end;
 
-procedure TfrmPrincipal.GerarPedido(pedido : TModelPedido);
+procedure TfrmPrincipal.GerarPedido();
 begin
   FPedido := TModelPedido.Create;
   FControllerPedido := TControllerPedido.Create;
-  FItensPedido := TModelItensPedido.Create;
   try
     FPedido.Codigo  := StrToInt(lblCodigoPedido.Caption);
     FPedido.DataEmissao := Now;
@@ -243,11 +235,12 @@ begin
     dsDetPedido.DataSet.First;
     while not dsDetPedido.DataSet.Eof do
     begin
-      FItensPedido.CodigoPedido      := FPedido.Codigo;
-      FItensPedido.CodigoProduto     := dsDetPedido.DataSet.FieldByName('det_prod_codigo').AsInteger;
-      FItensPedido.QuantidadeProduto := dsDetPedido.DataSet.FieldByName('det_prod_quantidade').AsInteger;
-      FItensPedido.ValorUnitProduto  := dsDetPedido.DataSet.FieldByName('det_valor_unit').AsInteger;
-      FItensPedido.ValorTotal        := dsDetPedido.DataSet.FieldByName('det_valor_total').AsInteger;
+      FItensPedido := TModelItensPedido.Create;
+      FItensPedido.CodigoPedido  := FPedido.Codigo;
+      FItensPedido.CodigoProduto := dsDetPedido.DataSet.FieldByName('det_prod_codigo').AsInteger;
+      FItensPedido.Quantidade    := dsDetPedido.DataSet.FieldByName('det_prod_quantidade').AsInteger;
+      FItensPedido.ValorUnit     := dsDetPedido.DataSet.FieldByName('det_valor_unit').AsInteger;
+      FItensPedido.ValorTotal    := dsDetPedido.DataSet.FieldByName('det_valor_total').AsInteger;
       FPedido.itensPedido.Add(FItensPedido);
       dsDetPedido.DataSet.Next;
     end;
@@ -256,6 +249,7 @@ begin
     FPedido.DisposeOf;
     FItensPedido.DisposeOf;
     FControllerPedido.DisposeOf;
+    Application.MessageBox('Pedido Salvo com Sucesso!','Mensagem do Sistema.',MB_ICONINFORMATION+MB_OK);
   end;
 end;
 
