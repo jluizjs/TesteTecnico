@@ -1,0 +1,7 @@
+unit WK_TesteTecnico.Model.PedidoDetalhe;
+
+interface
+
+implementation
+
+end.

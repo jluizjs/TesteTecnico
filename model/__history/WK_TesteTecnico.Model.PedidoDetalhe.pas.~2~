@@ -1,0 +1,24 @@
+unit WK_TesteTecnico.Model.PedidoDetalhe;
+
+interface
+
+type
+  TPedidoDetalhe = class
+    private
+    FdetProdCodigo: Integer;
+    FdetValorTotal: Integer;
+    FdetQuantidade: Integer;
+    FdetPedCodigo: Integer;
+    FdetValorUnit: Integer;
+    public
+      property detPedCodigo: Integer read FdetPedCodigo write FdetPedCodigo;
+      property detProdCodigo: Integer read FdetProdCodigo write FdetProdCodigo;
+      property detQuantidade: Integer read FdetQuantidade write FdetQuantidade;
+      property detValorUnit: Integer read FdetValorUnit write FdetValorUnit;
+      property detValorTotal: Integer read FdetValorTotal write FdetValorTotal;
+
+  end;
+
+implementation
+
+end.

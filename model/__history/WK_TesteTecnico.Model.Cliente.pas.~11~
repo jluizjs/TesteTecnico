@@ -1,0 +1,43 @@
+unit WK_TesteTecnico.Model.Cliente;
+
+interface
+
+type
+  TCliente = class
+    private
+      FcliNome: String;
+      FcliCidade: String;
+      FcliCodigo: Integer;
+      FcliUF: String;
+    public
+      function BuscarCliente(value : Integer): String;
+      property cliCodigo: Integer read FcliCodigo write FcliCodigo;
+      property cliNome: String read FcliNome write FcliNome;
+      property cliCidade: String read FcliCidade write FcliCidade;
+      property cliUF: String read FcliUF write FcliUF;
+  end;
+
+implementation
+
+{ Cliente }
+
+uses
+  WK_TesteTecnico.Model.DM,
+  System.SysUtils,
+  Vcl.Dialogs;
+
+{ TCliente }
+
+function TCliente.BuscarCliente(value: Integer): String;
+begin
+  try
+    Result := DM.FDConnection.ExecSQLScalar(
+      'SELECT CLI_NOME FROM CLIENTE WHERE CLI_CODIGO = :CODIGO'
+      ,[value]
+    );
+  Except on E: Exception do
+    ShowMessage('Erro: ' + E.Message);
+  end;
+end;
+
+end.

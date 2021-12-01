@@ -1,0 +1,39 @@
+unit WK_TesteTecnico.Controller.Cliente;
+
+interface
+
+uses
+  WK_TesteTecnico.Controller.Interfaces;
+
+type
+  TControllerCliente = class(TInterfacedObject, iControllerCliente)
+    private
+    public
+      constructor Create;
+      Destructor Destroy; override;
+      class function New: iControllerCliente;
+      function Codigo(Value : Integer): IControllerCliente;
+    function Executar: IControllerCliente;
+  end;
+
+implementation
+
+{ TControllerCliente }
+
+constructor TControllerCliente.Create;
+begin
+
+end;
+
+destructor TControllerCliente.Destroy;
+begin
+
+  inherited;
+end;
+
+class function TControllerCliente.New: iControllerCliente;
+begin
+  Result := Self.Create;
+end;
+
+end.

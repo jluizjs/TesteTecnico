@@ -1,0 +1,29 @@
+unit WK_TesteTecnico.Model.Interfaces;
+
+interface
+
+uses
+  WK_TesteTecnico.Model.Pedido, WK_TesteTecnico.Model.Produto;
+
+type
+  iModelProduto = interface;
+
+  IModelPedido = interface
+    ['{E6EFD0F3-F0DB-476A-AAC5-27911AAC8F26}']
+    function NovoPedido(): Integer;
+    procedure GravarPedido(Pedido: TModelPedido);
+  end;
+
+  iModelProduto = interface
+    ['{FD3C30A2-47CF-4C01-BC18-638BEC39A57D}']
+    procedure LancarItem(produto : TModelProduto);
+  end;
+
+  iModelCliente = interface
+    ['{40295AA6-ED67-4CDA-BF91-3FE04F55B559}']
+    function BuscarCliente(Value : Integer): String;
+  end;
+
+implementation
+
+end.

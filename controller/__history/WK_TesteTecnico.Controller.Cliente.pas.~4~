@@ -1,0 +1,38 @@
+unit WK_TesteTecnico.Controller.Cliente;
+
+interface
+
+uses
+  WK_TesteTecnico.Controller.Interfaces;
+
+type
+  TControllerCliente = class(TInterfacedObject, iControllerCliente)
+    private
+      FCliente : TModelCleinte;
+    public
+      constructor Create;
+      Destructor Destroy; override;
+      function BuscarCliente(Value: Integer): String;
+  end;
+
+implementation
+
+{ TControllerCliente }
+
+function TControllerCliente.BuscarCliente(Value: Integer): String;
+begin
+
+end;
+
+constructor TControllerCliente.Create;
+begin
+
+end;
+
+destructor TControllerCliente.Destroy;
+begin
+
+  inherited;
+end;
+
+end.

@@ -1,0 +1,69 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Caption = 'WK Teste Tecnico - Pedido'
+  ClientHeight = 425
+  ClientWidth = 742
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  PixelsPerInch = 96
+  TextHeight = 13
+  object pnlPrincipal: TPanel
+    Left = 0
+    Top = 0
+    Width = 742
+    Height = 425
+    Align = alClient
+    TabOrder = 0
+    ExplicitLeft = 272
+    ExplicitTop = 200
+    ExplicitWidth = 185
+    ExplicitHeight = 41
+    object pnlTopo: TPanel
+      Left = 1
+      Top = 1
+      Width = 740
+      Height = 88
+      Align = alTop
+      TabOrder = 0
+    end
+    object pnlBottom: TPanel
+      Left = 1
+      Top = 365
+      Width = 740
+      Height = 59
+      Align = alBottom
+      TabOrder = 1
+      ExplicitTop = 336
+      ExplicitWidth = 705
+    end
+    object pnlMenu: TPanel
+      Left = 556
+      Top = 89
+      Width = 185
+      Height = 276
+      Align = alRight
+      TabOrder = 2
+      ExplicitLeft = 304
+      ExplicitTop = 152
+      ExplicitHeight = 41
+    end
+    object TPanel
+      Left = 1
+      Top = 89
+      Width = 555
+      Height = 276
+      Align = alClient
+      TabOrder = 3
+      ExplicitLeft = 272
+      ExplicitTop = 176
+      ExplicitWidth = 185
+      ExplicitHeight = 41
+    end
+  end
+end

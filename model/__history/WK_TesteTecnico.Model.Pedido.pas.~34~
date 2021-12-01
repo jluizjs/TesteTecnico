@@ -1,0 +1,100 @@
+unit WK_TesteTecnico.Model.Pedido;
+
+interface
+
+uses
+  System.Generics.Collections,
+  WK_TesteTecnico.Model.ItensPedido,
+  WK_TesteTecnico.Model.Interfaces,
+  WK_TesteTecnico.Model.DM;
+
+type
+  TModelPedido = class
+    private
+      FConexao : TDM;
+      FTotal: Double;
+      FDataEmissao: TDateTime;
+      FCliCodigo: Integer;
+      FCodigo: Integer;
+      FItensPedido: TList<TItensPedido>;
+    public
+      constructor Create;
+      destructor Destroy; override;
+      property Codigo: Integer read FCodigo write FCodigo;
+      property DataEmissao: TDateTime read FDataEmissao write FDataEmissao;
+      property CliCodigo: Integer read FCliCodigo write FCliCodigo;
+      property Total: Double read FTotal write FTotal;
+      property ItensPedido: TList<TItensPedido> read FitensPedido write FitensPedido;
+      function NovoPedido(): Integer;
+      procedure GravarPedido(Pedido: TModelPedido);
+  end;
+
+implementation
+
+uses
+  WK_TesteTecnico.Model.Produto, System.SysUtils;
+
+{ TModelPedido }
+
+constructor TModelPedido.Create;
+begin
+  FitensPedido := TList<TItensPedido>.Create;
+end;
+
+destructor TModelPedido.Destroy;
+begin
+  FitensPedido.DisposeOf;
+  inherited;
+end;
+
+procedure TModelPedido.GravarPedido(Pedido: TModelPedido);
+var
+  SQL: String;
+  I: Integer;
+begin
+  FConexao.StartTransaction;
+  try
+    SQL := 'INSERT INTO PEDIDO VALUES (?,?,?,?)';
+    FConexao.PrepareStatement(SQL);
+    FConexao.SetValue(0, pedido.Codigo);
+    FConexao.SetValue(1, pedido.DataEmissao);
+    FConexao.SetValue(2, pedido.CliCodigo);
+    FConexao.SetValue(3, pedido.Total);
+    FConexao.ExecSQL;
+    SQL := '';
+    for I := 0 to Pred(pedido.itensPedido.Count) do
+    begin
+      SQL := 'INSERT INTO PEDIDO_DETALHE (DET_PED_CODIGO, DET_PROD_CODIGO, '+
+        'DET_QUANTIDADE, DET_VALOR_UNIT, DET_VALOR_TOTAL) VALUES (?,?,?,?,?)';
+      FConexao.PrepareStatement(SQL);
+      FConexao.SetValue(0, pedido.itensPedido[I].detPedCodigo);
+      FConexao.SetValue(1, pedido.itensPedido[I].detProdCodigo);
+      FConexao.SetValue(2, pedido.itensPedido[I].detQuantidade);
+      FConexao.SetValue(3, pedido.itensPedido[I].detValorUnit);
+      FConexao.SetValue(4, pedido.itensPedido[I].detValorTotal);
+      FConexao.ExecSQL
+    end;
+    FConexao.Commit;
+  except
+    FConexao.RollBack;
+  end;
+end;
+
+function TModelPedido.NovoPedido: Integer;
+var
+  value : Integer;
+begin
+  try
+    value := DM.FDConnection.ExecSQLScalar(
+      'SELECT MAX(PED_CODIGO) FROM PEDIDO');
+    if (value > 0) then
+      Result := value + 1
+    else
+      Result := 1;
+  except
+    raise Exception.Create('Erro ao buscar cód. Pedido.');
+  end;
+
+end;
+
+end.

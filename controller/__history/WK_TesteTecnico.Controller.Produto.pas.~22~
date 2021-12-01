@@ -1,0 +1,59 @@
+unit WK_TesteTecnico.Controller.Produto;
+
+interface
+
+uses
+  WK_TesteTecnico.Controller.Interfaces;
+
+type
+  TControllerProduto = class(TInterfacedObject, iControllerProduto)
+    private
+      [weak]
+      FParent : IControllerPedido;
+      FCodigo : Integer;
+    public
+      constructor Create(Parent: IControllerPedido);
+      Destructor Destroy; override;
+      class function New(Parent: IControllerPedido): iControllerProduto;
+      function Codigo(Value : Integer): IControllerProduto;
+      function InserirItemPedido: IControllerProduto;
+      function &End : IControllerPedido;
+  end;
+
+implementation
+
+{ TControllerProduto }
+
+function TControllerProduto.Codigo(Value: Integer): IControllerProduto;
+begin
+  Result := Self;
+  FCodigo := Value;
+end;
+
+function TControllerProduto.&End: IControllerPedido;
+begin
+  Result := FParent;
+end;
+
+constructor TControllerProduto.Create(Parent: IControllerPedido);
+begin
+  FParent := Parent;
+end;
+
+destructor TControllerProduto.Destroy;
+begin
+
+  inherited;
+end;
+
+function TControllerProduto.InserirItemPedido: IControllerProduto;
+begin
+  Result := Self;
+end;
+
+class function TControllerProduto.New(Parent: IControllerPedido): iControllerProduto;
+begin
+  Result := Self.Create(Parent);
+end;
+
+end.

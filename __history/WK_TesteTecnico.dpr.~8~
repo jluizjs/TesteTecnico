@@ -1,0 +1,20 @@
+program WK_TesteTecnico;
+
+uses
+  Vcl.Forms,
+  WK_TesteTecnico.View.Principal in 'View\WK_TesteTecnico.View.Principal.pas' {frmPrincipal},
+  WK_TesteTecnico.Model.DM in 'model\WK_TesteTecnico.Model.DM.pas' {DM: TDataModule},
+  WK_TesteTecnico.Model.Produto in 'model\WK_TesteTecnico.Model.Produto.pas',
+  WK_TesteTecnico.Model.Cliente in 'model\WK_TesteTecnico.Model.Cliente.pas',
+  WK_TesteTecnico.Model.Pedido in 'model\WK_TesteTecnico.Model.Pedido.pas',
+  WK_TesteTecnico.Model.PedidoDetalhe in 'model\WK_TesteTecnico.Model.PedidoDetalhe.pas';
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TfrmPrincipal, frmPrincipal);
+  Application.CreateForm(TDM, DM);
+  Application.Run;
+end.

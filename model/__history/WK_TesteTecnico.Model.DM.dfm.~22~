@@ -1,0 +1,61 @@
+object DM: TDM
+  OldCreateOrder = False
+  OnCreate = DataModuleCreate
+  Height = 301
+  Width = 542
+  object FDConnection1: TFDConnection
+    Params.Strings = (
+      'Database=wk_testetecnico'
+      'User_Name=root'
+      'Password=MySQLroot@123'
+      'Server=LOCALHOST'
+      'DriverID=MySQL')
+    LoginPrompt = False
+    Left = 24
+    Top = 8
+  end
+  object FDPhysMySQLDriverLink1: TFDPhysMySQLDriverLink
+    Left = 24
+    Top = 64
+  end
+  object fdqDetPedido: TFDQuery
+    Connection = FDConnection1
+    Left = 224
+    Top = 64
+  end
+  object dsDetPedido: TDataSource
+    DataSet = cdsDetPedido
+    Left = 22
+    Top = 161
+  end
+  object cdsDetPedido: TClientDataSet
+    Aggregates = <>
+    Params = <>
+    ProviderName = 'DataSetProvider1'
+    OnCalcFields = cdsDetPedidoCalcFields
+    Left = 24
+    Top = 120
+    object cdsDetPedidodet_prod_codigo: TIntegerField
+      FieldName = 'det_prod_codigo'
+    end
+    object cdsDetPedidodet_prod_descricao: TStringField
+      FieldName = 'det_prod_descricao'
+      Size = 60
+    end
+    object cdsDetPedidodet_valor_unit: TFloatField
+      FieldName = 'det_valor_unit'
+    end
+    object cdsDetPedidodet_valor_total: TFloatField
+      FieldKind = fkCalculated
+      FieldName = 'det_valor_total'
+      Calculated = True
+    end
+    object cdsDetPedidodet_prod_quantidade: TFloatField
+      FieldName = 'det_prod_quantidade'
+    end
+  end
+  object dspItensPedido: TDataSetProvider
+    Left = 24
+    Top = 208
+  end
+end
