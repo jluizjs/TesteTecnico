@@ -62,13 +62,14 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure btnGravarPedidoClick(Sender: TObject);
     procedure btnBuscarPedidoClick(Sender: TObject);
+    procedure btnExcluirPedidoClick(Sender: TObject);
   private
     { Private declarations }
-    FControllerCliente : TControllerCliente;
-    FControllerProduto : TControllerProduto;
-    FControllerPedido : TControllerPedido;
-    FProduto : TModelProduto;
-    FPedido : TModelPedido;
+    FControllerCliente: TControllerCliente;
+    FControllerProduto: TControllerProduto;
+    FControllerPedido: TControllerPedido;
+    FProduto: TModelProduto;
+    FPedido: TModelPedido;
     FItensPedido: TModelItensPedido;
     procedure InserirItemPedido();
     procedure LimparCamposItem();
@@ -76,6 +77,11 @@ type
     procedure GerarPedido();
     procedure CalculcarTotal();
     procedure FinalizarPedido();
+    procedure EditarItemPedido;
+    procedure LiberaBloqueiaEdicao;
+    procedure BloqueioInsertPedido;
+    procedure ExcluirPedido;
+    procedure BuscarPedido;
   public
     { Public declarations }
   end;
@@ -88,43 +94,47 @@ implementation
 {$R *.dfm}
 
 uses
- WK_TesteTecnico.Model.DM;
+  WK_TesteTecnico.Model.DM;
 
 procedure TfrmPrincipal.btnBuscarPedidoClick(Sender: TObject);
 begin
-  FControllerPedido := TControllerPedido.Create;
-  try
-    FControllerPedido.BuscarPedido(StrToInt(InputBox('Buscar Pedido','Código do Pedido:','0')));
-  finally
-    FControllerPedido.DisposeOf;
-  end;
+  BuscarPedido;
+end;
+
+procedure TfrmPrincipal.btnExcluirPedidoClick(Sender: TObject);
+begin
+  ExcluirPedido;
 end;
 
 procedure TfrmPrincipal.btnGravarPedidoClick(Sender: TObject);
 begin
-    GerarPedido();
-    FinalizarPedido;
+  GerarPedido();
+  FinalizarPedido;
 end;
 
 procedure TfrmPrincipal.btnInserirItemClick(Sender: TObject);
 begin
-  InserirItemPedido();
+  try
+    InserirItemPedido();
+    CalculcarTotal;
+  except on E:exception do
+    ShowMessage(E.Message);
+  end;
   LimparCamposItem();
-  CalculcarTotal;
 end;
 
 procedure TfrmPrincipal.btnNovoPedidoClick(Sender: TObject);
 var
-  codigo : Integer;
+  codigo: Integer;
 begin
   FControllerCliente := TControllerCliente.Create;
   FControllerPedido := TControllerPedido.Create;
   try
-    codigo := StrToInt(InputBox('Códido do Cliente','Digite:','0'));
+    codigo := StrToInt(InputBox('Códido do Cliente', 'Digite:', '0'));
     lblCodigoCliente.Caption := codigo.ToString;
-    lblNomeCliente.Caption   := 'Cliente: ' + FControllerCliente.BuscarCliente(codigo);
-    lblCodigoPedido.Caption  := FControllerPedido.NovoPedido.ToString;
-    pnlProduto.Enabled := True;
+    lblNomeCliente.Caption := 'Cliente: ' + FControllerCliente.BuscarCliente(codigo);
+    lblCodigoPedido.Caption := FControllerPedido.NovoPedido.ToString;
+    BloqueioInsertPedido;
     edtCodigoProduto.SetFocus;
   finally
     FControllerCliente.DisposeOf;
@@ -142,10 +152,10 @@ begin
   FControllerProduto := TControllerProduto.Create;
   FProduto := TModelProduto.Create;
   try
-     FProduto := FControllerProduto.BuscarProduto(codigo);
-     edtDescricaoProduto.Text := FProduto.Descricao;
-     edtValorUnitProduto.Text := FProduto.PrecoVenda.ToString;
-     edtQuantidadeProduto.SetFocus;
+    FProduto := FControllerProduto.BuscarProduto(codigo);
+    edtDescricaoProduto.Text := FProduto.Descricao;
+    edtValorUnitProduto.Text := FProduto.PrecoVenda.ToString;
+    edtQuantidadeProduto.SetFocus;
   finally
     FControllerProduto.DisposeOf;
     FProduto.DisposeOf;
@@ -159,7 +169,7 @@ begin
   soma := 0;
   dsDetPedido.DataSet.First;
   repeat
-    soma := soma + dsDetPedido.DataSet.FieldByName('DET_VALOR_TOTAL').AsFloat;
+    soma := soma + dsDetPedido.DataSet.FieldByName('ValorTotal').AsFloat;
     dsDetPedido.DataSet.Next;
   until dsDetPedido.DataSet.Eof;
   lblTotalPedido.Caption := soma.ToString;
@@ -167,15 +177,21 @@ end;
 
 procedure TfrmPrincipal.dbgDetPedidoKeyPress(Sender: TObject; var Key: Char);
 begin
-  if key = #13 then
-    dbgDetPedido.Options := dbgDetPedido.Options + [dgEditing];
+  if Key = #13 then
+  begin
+    EditarItemPedido;
+  end;
 end;
 
 procedure TfrmPrincipal.edtCodigoProdutoKeyPress(Sender: TObject;
   var Key: Char);
 begin
   if (Key = #13) then
-    BuscarProduto(strToInt(edtCodigoProduto.Text));
+    try
+      BuscarProduto(StrToInt(edtCodigoProduto.Text));
+    except
+      raise Exception.Create('Erro ao buscar Produto.');
+    end;
 end;
 
 procedure TfrmPrincipal.edtQuantidadeProdutoKeyPress(Sender: TObject;
@@ -196,22 +212,91 @@ procedure TfrmPrincipal.FinalizarPedido;
 begin
   LimparCamposItem;
   lblCodigoCliente.Caption := '';
-  lblNomeCliente.Caption   := '';
-  lblCodigoPedido.Caption  := '';
-  lblTotalPedido.Caption  := '';
+  lblNomeCliente.Caption := '';
+  lblCodigoPedido.Caption := '';
+  lblTotalPedido.Caption := '';
   pnlProduto.Enabled := False;
+  btnExcluirPedido.Enabled := True;
+  btnBuscarPedido.Enabled := True;
+end;
+
+procedure TfrmPrincipal.EditarItemPedido;
+begin
+  dsDetPedido.DataSet.Edit;
+  edtCodigoProduto.Text     := IntToStr(dsDetPedido.DataSet.FieldByName('Codigo').AsInteger);
+  edtDescricaoProduto.Text  := dsDetPedido.DataSet.FieldByName('Descricao').AsString;
+  edtQuantidadeProduto.Text := FloatToStr(dsDetPedido.DataSet.FieldByName('Quantidade').AsFloat);
+  edtValorUnitProduto.Text  := FloatToStr(dsDetPedido.DataSet.FieldByName('ValorUnit').AsFloat);
+  LiberaBloqueiaEdicao;
+  edtQuantidadeProduto.SetFocus;
+end;
+
+procedure TfrmPrincipal.LiberaBloqueiaEdicao;
+begin
+  //
+  if not (dsDetPedido.DataSet.State in [DsEdit]) then
+  begin
+    edtCodigoProduto.Enabled := True;
+    edtDescricaoProduto.Enabled := True;
+  end
+  else
+  begin
+    edtCodigoProduto.Enabled := False;
+    edtDescricaoProduto.Enabled := False;
+  end;
+end;
+
+procedure TfrmPrincipal.BloqueioInsertPedido;
+begin
+  pnlProduto.Enabled := True;
+  btnBuscarPedido.Enabled := False;
+  btnExcluirPedido.Enabled := False;
+end;
+
+procedure TfrmPrincipal.ExcluirPedido;
+var
+  codigo: Integer;
+begin
+  FControllerPedido := TControllerPedido.Create;
+  codigo := StrToInt(InputBox('Excluir Pedido', 'Código:', '0'));
+  try
+    if Application.MessageBox('Confirma Exclusão do Pedido?', 'Confirmação', MB_ICONWARNING + MB_YESNO) = mrYes then
+      FControllerPedido.ExcluirPedido(codigo);
+    Application.MessageBox('Pedido Excluido!', 'Mensagem do Sistema.', MB_ICONINFORMATION + MB_OK);
+  finally
+    FPedido.DisposeOf;
+  end;
+end;
+
+procedure TfrmPrincipal.BuscarPedido;
+var
+  I: Integer;
+begin
+  FControllerPedido := TControllerPedido.Create;
+  FPedido := TModelPedido.Create;
+  try
+    FPedido := FControllerPedido.BuscarPedido(StrToInt(InputBox('Buscar Pedido', 'Código do Pedido:', '0')));
+    ShowMessage(FPedido.codigo.ToString);
+    for I := 0 to Pred(FPedido.ItensPedido.Count) do
+    begin
+      ShowMessage(FPedido.ItensPedido[I].CodigoPedido.ToString);
+    end;
+  finally
+    FControllerPedido.DisposeOf;
+  end;
 end;
 
 procedure TfrmPrincipal.FormKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
-  if key = VK_UP then
+  if Key = VK_UP then
     dsDetPedido.DataSet.Prior;
-  if key = VK_DOWN then
+  if Key = VK_DOWN then
     dsDetPedido.DataSet.Next;
-  if key = VK_DELETE then
+  if Key = VK_DELETE then
   begin
-    if (Application.MessageBox('Confirma exclusão?','Exclusão de Itens',MB_ICONWARNING + MB_YESNO) = mrYes) then
+    if (Application.MessageBox('Confirma exclusão?', 'Exclusão de Itens',
+      MB_ICONWARNING + MB_YESNO) = mrYes) then
     begin
       try
         dsDetPedido.DataSet.Delete;
@@ -228,7 +313,7 @@ begin
   FPedido := TModelPedido.Create;
   FControllerPedido := TControllerPedido.Create;
   try
-    FPedido.Codigo  := StrToInt(lblCodigoPedido.Caption);
+    FPedido.codigo := StrToInt(lblCodigoPedido.Caption);
     FPedido.DataEmissao := Now;
     FPedido.CodigoCliente := StrToInt(lblCodigoCliente.Caption);
     FPedido.Total := StrToFloat(lblTotalPedido.Caption);
@@ -236,12 +321,12 @@ begin
     while not dsDetPedido.DataSet.Eof do
     begin
       FItensPedido := TModelItensPedido.Create;
-      FItensPedido.CodigoPedido  := FPedido.Codigo;
-      FItensPedido.CodigoProduto := dsDetPedido.DataSet.FieldByName('det_prod_codigo').AsInteger;
-      FItensPedido.Quantidade    := dsDetPedido.DataSet.FieldByName('det_prod_quantidade').AsInteger;
-      FItensPedido.ValorUnit     := dsDetPedido.DataSet.FieldByName('det_valor_unit').AsInteger;
-      FItensPedido.ValorTotal    := dsDetPedido.DataSet.FieldByName('det_valor_total').AsInteger;
-      FPedido.itensPedido.Add(FItensPedido);
+      FItensPedido.CodigoPedido := FPedido.codigo;
+      FItensPedido.CodigoProduto := dsDetPedido.DataSet.FieldByName('Codigo').AsInteger;
+      FItensPedido.Quantidade := dsDetPedido.DataSet.FieldByName('Quantidade').AsInteger;
+      FItensPedido.ValorUnit := dsDetPedido.DataSet.FieldByName('ValorUnit').AsInteger;
+      FItensPedido.ValorTotal := dsDetPedido.DataSet.FieldByName('ValorTotal').AsInteger;
+      FPedido.ItensPedido.Add(FItensPedido);
       dsDetPedido.DataSet.Next;
     end;
     FControllerPedido.GravarPedido(FPedido);
@@ -249,23 +334,42 @@ begin
     FPedido.DisposeOf;
     FItensPedido.DisposeOf;
     FControllerPedido.DisposeOf;
-    Application.MessageBox('Pedido Salvo com Sucesso!','Mensagem do Sistema.',MB_ICONINFORMATION+MB_OK);
+    Application.MessageBox('Pedido Salvo com Sucesso!', 'Mensagem do Sistema.',
+      MB_ICONINFORMATION + MB_OK);
   end;
 end;
 
 procedure TfrmPrincipal.InserirItemPedido();
 begin
   try
-    DM.cdsDetPedido.Append;
-    DM.cdsDetPedidodet_prod_codigo.AsInteger      := StrToInt(edtCodigoProduto.Text);
-    DM.cdsDetPedidodet_prod_descricao.AsString    := edtDescricaoProduto.Text;
-    DM.cdsDetPedidodet_prod_quantidade.AsFloat    := StrToFloat(edtQuantidadeProduto.Text);
-    DM.cdsDetPedidodet_valor_unit.AsFloat         := StrToFloat(edtValorUnitProduto.Text);
-    DM.cdsDetPedido.Post;
+    if not(dsDetPedido.DataSet.state in [dsEdit]) then
+    begin
+      dsDetPedido.DataSet.Append;
+      dsDetPedido.DataSet.FieldByName('Codigo').AsInteger :=
+        StrToInt(edtCodigoProduto.Text);
+      dsDetPedido.DataSet.FieldByName('Descricao').AsString :=
+        edtDescricaoProduto.Text;
+      dsDetPedido.DataSet.FieldByName('Quantidade').AsFloat :=
+        StrToFloat(edtQuantidadeProduto.Text);
+      dsDetPedido.DataSet.FieldByName('ValorUnit').AsFloat :=
+        StrToFloat(edtValorUnitProduto.Text);
+    end
+    else
+    begin
+      dsDetPedido.DataSet.FieldByName('Codigo').AsInteger :=
+        StrToInt(edtCodigoProduto.Text);
+      dsDetPedido.DataSet.FieldByName('Descricao').AsString :=
+        edtDescricaoProduto.Text;
+      dsDetPedido.DataSet.FieldByName('Quantidade').AsFloat :=
+        StrToFloat(edtQuantidadeProduto.Text);
+      dsDetPedido.DataSet.FieldByName('ValorUnit').AsFloat :=
+        StrToFloat(edtValorUnitProduto.Text);
+    end;
+    dsDetPedido.DataSet.Post;
+    LiberaBloqueiaEdicao;
   finally
   end;
 end;
-
 
 procedure TfrmPrincipal.LimparCamposItem;
 begin
@@ -275,4 +379,5 @@ begin
   edtValorUnitProduto.Clear;
   edtCodigoProduto.SetFocus;
 end;
+
 end.

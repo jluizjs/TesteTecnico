@@ -33,12 +33,13 @@ type
     FDPhysMySQLDriverLink1: TFDPhysMySQLDriverLink;
     FDQuery: TFDQuery;
     cdsDetPedido: TClientDataSet;
-    cdsDetPedidodet_prod_codigo: TIntegerField;
-    cdsDetPedidodet_prod_descricao: TStringField;
     dspItensPedido: TDataSetProvider;
-    cdsDetPedidodet_valor_unit: TFloatField;
-    cdsDetPedidodet_prod_quantidade: TFloatField;
-    cdsDetPedidodet_valor_total: TFloatField;
+    FDMemTable1: TFDMemTable;
+    cdsDetPedidoValorUnit: TFloatField;
+    cdsDetPedidoQuantidade: TFloatField;
+    cdsDetPedidoValorTotal: TFloatField;
+    cdsDetPedidoCodigo: TIntegerField;
+    cdsDetPedidoDescricao: TStringField;
     procedure DataModuleCreate(Sender: TObject);
     procedure cdsDetPedidoCalcFields(DataSet: TDataSet);
   private
@@ -65,9 +66,9 @@ implementation
 
 procedure TDM.cdsDetPedidoCalcFields(DataSet: TDataSet);
 begin
-  cdsDetPedido.FieldByName('det_valor_total').AsFloat :=
-    cdsDetPedido.FieldByName('det_valor_unit').AsFloat*
-    cdsDetPedido.FieldByName('det_prod_quantidade').AsFloat;
+  cdsDetPedido.FieldByName('ValorTotal').AsFloat :=
+    cdsDetPedido.FieldByName('ValorUnit').AsFloat*
+    cdsDetPedido.FieldByName('Quantidade').AsFloat;
 end;
 
 procedure TDM.Commit;

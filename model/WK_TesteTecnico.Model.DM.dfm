@@ -30,27 +30,38 @@ object DM: TDM
     OnCalcFields = cdsDetPedidoCalcFields
     Left = 24
     Top = 120
-    object cdsDetPedidodet_prod_codigo: TIntegerField
-      FieldName = 'det_prod_codigo'
+    object cdsDetPedidoCodigo: TIntegerField
+      FieldName = 'Codigo'
     end
-    object cdsDetPedidodet_prod_descricao: TStringField
-      FieldName = 'det_prod_descricao'
-      Size = 60
+    object cdsDetPedidoDescricao: TStringField
+      FieldName = 'Descricao'
+      Size = 100
     end
-    object cdsDetPedidodet_valor_unit: TFloatField
-      FieldName = 'det_valor_unit'
+    object cdsDetPedidoValorUnit: TFloatField
+      FieldName = 'ValorUnit'
     end
-    object cdsDetPedidodet_prod_quantidade: TFloatField
-      FieldName = 'det_prod_quantidade'
+    object cdsDetPedidoQuantidade: TFloatField
+      FieldName = 'Quantidade'
     end
-    object cdsDetPedidodet_valor_total: TFloatField
+    object cdsDetPedidoValorTotal: TFloatField
       FieldKind = fkCalculated
-      FieldName = 'det_valor_total'
+      FieldName = 'ValorTotal'
       Calculated = True
     end
   end
   object dspItensPedido: TDataSetProvider
     Left = 24
     Top = 168
+  end
+  object FDMemTable1: TFDMemTable
+    FetchOptions.AssignedValues = [evMode]
+    FetchOptions.Mode = fmAll
+    ResourceOptions.AssignedValues = [rvSilentMode]
+    ResourceOptions.SilentMode = True
+    UpdateOptions.AssignedValues = [uvCheckRequired, uvAutoCommitUpdates]
+    UpdateOptions.CheckRequired = False
+    UpdateOptions.AutoCommitUpdates = True
+    Left = 224
+    Top = 112
   end
 end

@@ -18,6 +18,7 @@ type
       procedure GravarPedido(Pedido: TModelPedido);
       function NovoPedido(): Integer;
       function BuscarPedido(codigo: Integer): TModelPedido;
+      procedure ExcluirPedido(codigo : Integer);
   end;
 
 implementation
@@ -48,6 +49,16 @@ begin
   inherited;
 end;
 
+
+procedure TControllerPedido.ExcluirPedido(codigo: Integer);
+begin
+  FDaoPedido := TDaoPedido.Create;
+  try
+    FDaoPedido.ExcluirPedido(codigo);
+  finally
+    FDaoPedido.DisposeOf;
+  end;
+end;
 
 procedure TControllerPedido.GravarPedido(pedido: TModelPedido);
 begin

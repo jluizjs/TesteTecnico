@@ -74,8 +74,6 @@ object frmPrincipal: TfrmPrincipal
         Height = 30
         Align = alRight
         TabOrder = 0
-        ExplicitLeft = 557
-        ExplicitTop = -4
         object lblPedido: TLabel
           Left = 8
           Top = -1
@@ -90,9 +88,9 @@ object frmPrincipal: TfrmPrincipal
           ParentFont = False
         end
         object lblCodigoPedido: TLabel
-          Left = 115
+          Left = 175
           Top = 1
-          Width = 67
+          Width = 7
           Height = 28
           Align = alRight
           Font.Charset = DEFAULT_CHARSET
@@ -101,6 +99,7 @@ object frmPrincipal: TfrmPrincipal
           Font.Name = 'Tahoma'
           Font.Style = []
           ParentFont = False
+          ExplicitHeight = 25
         end
       end
       object pnlProduto: TPanel
@@ -144,8 +143,6 @@ object frmPrincipal: TfrmPrincipal
           Caption = 'Inserir Item'
           TabOrder = 4
           OnClick = btnInserirItemClick
-          ExplicitLeft = 559
-          ExplicitTop = 0
         end
         object edtQuantidadeProduto: TLabeledEdit
           Left = 334
@@ -250,6 +247,7 @@ object frmPrincipal: TfrmPrincipal
         Align = alTop
         Caption = 'Excluir Pedido'
         TabOrder = 2
+        OnClick = btnExcluirPedidoClick
       end
       object btnSair: TButton
         Left = 1
@@ -286,7 +284,7 @@ object frmPrincipal: TfrmPrincipal
         Height = 309
         Align = alClient
         DataSource = dsDetPedido
-        Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgConfirmDelete, dgCancelOnExit, dgTitleClick, dgTitleHotTrack]
+        Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgTitleClick, dgTitleHotTrack]
         TabOrder = 0
         TitleFont.Charset = DEFAULT_CHARSET
         TitleFont.Color = clWindowText
@@ -297,37 +295,32 @@ object frmPrincipal: TfrmPrincipal
         Columns = <
           item
             Expanded = False
-            FieldName = 'det_prod_codigo'
+            FieldName = 'Codigo'
             Title.Caption = 'C'#243'digo'
-            Width = 66
             Visible = True
           end
           item
             Expanded = False
-            FieldName = 'det_prod_descricao'
+            FieldName = 'Descricao'
             Title.Caption = 'Descri'#231#227'o'
-            Width = 200
+            Width = 250
             Visible = True
           end
           item
             Expanded = False
-            FieldName = 'det_valor_unit'
+            FieldName = 'ValorUnit'
             Title.Caption = 'Valor Unit.'
-            Width = 62
             Visible = True
           end
           item
             Expanded = False
-            FieldName = 'det_prod_quantidade'
-            Title.Caption = 'Quantidade'
-            Width = 81
+            FieldName = 'Quantidade'
             Visible = True
           end
           item
             Expanded = False
-            FieldName = 'det_valor_total'
+            FieldName = 'ValorTotal'
             Title.Caption = 'Total'
-            Width = 71
             Visible = True
           end>
       end

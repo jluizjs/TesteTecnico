@@ -35,10 +35,10 @@ begin
     produto := TModelProduto.Create;
     produto.FCodigo := value;
     produto.FDescricao := DM.FDConnection.ExecSQLScalar(
-      'SELECT PROD_DESCRICAO FROM PRODUTO WHERE PROD_CODIGO = :CODIGO'
+      'SELECT DESCRICAO FROM PRODUTO WHERE CODIGO = :CODIGO'
       ,[produto.FCodigo]);
     produto.FPrecoVenda := DM.FDConnection.ExecSQLScalar(
-      'SELECT PROD_PRECO_VENDA FROM PRODUTO WHERE PROD_CODIGO = :CODIGO'
+      'SELECT PRECO_VENDA FROM PRODUTO WHERE CODIGO = :CODIGO'
       ,[produto.FCodigo]);
     Result := produto;
   except

@@ -35,7 +35,7 @@ function TModelCliente.BuscarCliente(value: Integer): String;
 begin
   try
     Result := DM.FDConnection.ExecSQLScalar(
-      'SELECT CLI_NOME FROM CLIENTE WHERE CLI_CODIGO = :CODIGO'
+      'SELECT NOME FROM CLIENTE WHERE CODIGO = :CODIGO'
       ,[value]
     );
   Except on E: Exception do
