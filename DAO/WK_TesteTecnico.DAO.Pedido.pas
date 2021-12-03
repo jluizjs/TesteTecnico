@@ -6,12 +6,13 @@ uses
 
    WK_TesteTecnico.Model.DM,
    WK_TesteTecnico.Model.Pedido,
-   WK_TesteTecnico.Model.ItensPedido;
+   WK_TesteTecnico.Model.ItensPedido,
+   Data.DB;
 
 type
   TDaoPedido = class
     private
-      FConexao : TDM;
+      DM : TDM;
       FPedido : TModelPedido;
       FItensPedido : TModelItensPedido;
     public
@@ -19,65 +20,71 @@ type
       Destructor Destroy; override;
       procedure GravarPedido(pedido: TModelPedido);
       function NovoPedido(): Integer;
-      function BuscarPedido(codigo: Integer): TModelPedido;
+      procedure BuscarPedido(pedido: TModelPedido; DataSet: TDataSet);
       procedure ExcluirPedido(codigo: Integer);
   end;
 
 implementation
 
 uses
-  System.SysUtils, System.Variants, Data.DB, FireDAC.Comp.Client;
+  System.SysUtils, System.Variants, FireDAC.Comp.Client;
 
 { TDaoPedido }
 
-function TDaoPedido.BuscarPedido(codigo: Integer): TModelPedido;
+procedure TDaoPedido.BuscarPedido(pedido: TModelPedido; DataSet:  TDataSet);
 var
-  SQL : String;
   I : Integer;
 begin
-  FPedido := TModelPedido.Create;
   try
-    SQL := 'SELECT * FROM PEDIDO WHERE CODIGO='+codigo.ToString;
-    FConexao.FDQuery.SQL.Clear;
-    FConexao.FDQuery.SQL.Add( SQL);
-    FConexao.FDQuery.Open;
-    if FConexao.FDQuery.RecordCount > 0 then
+    DM.FDQuery.SQL.Clear;
+    DM.FDQuery.SQL.Add('SELECT * FROM PEDIDO WHERE CODIGO= :CODIGO');
+    DM.FDQuery.ParamByName('CODIGO').AsInteger := Pedido.Codigo;
+    DM.FDQuery.Open;
+    if DM.FDQuery.RecordCount > 0 then
     begin
-      FPedido.Codigo := FConexao.FDQuery.FieldByName('CODIGO').AsInteger;
-      FPedido.CodigoCliente := FConexao.FDQuery.FieldByName('CODIGO_CLIENTE').AsInteger;
-      FPedido.Total := FConexao.FDQuery.FieldByName('TOTAL').AsFloat;
+      Pedido.DataEmissao := DM.FDQuery.FieldByName('DATA_EMISSAO').AsDateTime;
+      Pedido.CodigoCliente := DM.FDQuery.FieldByName('CODIGO_CLIENTE').AsInteger;
+      Pedido.Total := DM.FDQuery.FieldByName('TOTAL').AsFloat;
       //
-      SQL := 'SELECT * FROM PEDIDO_DETALHE WHERE CODIGO_PEDIDO='+codigo.ToString;
-      FConexao.FDQuery.SQL.Clear;
-      FConexao.FDQuery.SQL.Add(SQL);
-      FConexao.FDQuery.Open;
-      if FConexao.FDQuery.RecordCount > 0 then
+      DM.FDQuery.SQL.Clear;
+      DM.FDQuery.SQL.Add(
+        'SELECT P.CODIGO, P.DESCRICAO, PD.QUANTIDADE, PD.VALOR_UNIT, PD.VALOR_TOTAL '+
+        'FROM PEDIDO_DETALHE  PD '+
+        'INNER JOIN PRODUTO P on P.CODIGO = pd.CODIGO_PRODUTO '+
+        'WHERE CODIGO_PEDIDO = :CODIGO_PEDIDO'
+      );
+      DM.FDQuery.ParamByName('CODIGO_PEDIDO').AsInteger := Pedido.Codigo;
+      DM.FDQuery.Open;
+      if DM.FDQuery.RecordCount > 0 then
       begin
-        FConexao.FDQuery.First;
-        for I := 0 to pred(FConexao.FDQuery.RecordCount) do
+        DM.FDQuery.First;
+        while not (DM.FDQuery.Eof) do
         begin
-          FItensPedido := TModelItensPedido.Create;
-          FItensPedido.CodigoPedido  := FConexao.FDQuery.FieldByName('CODIGO_PEDIDO').AsInteger;
-          FItensPedido.CodigoProduto := FConexao.FDQuery.FieldByName('CODIGO_PRODUTO').AsInteger;
-          FItensPedido.Quantidade    := FConexao.FDQuery.FieldByName('QUANTIDADE').AsFloat;
-          FItensPedido.ValorUnit     := FConexao.FDQuery.FieldByName('VALOR_UNIT').AsFloat;
-          FItensPedido.ValorTotal    := FConexao.FDQuery.FieldByName('VALOR_TOTAL').AsFloat;
-          FPedido.ItensPedido.Add(FItensPedido);
+          DataSet.Append;
+          DataSet.FieldByName('Codigo').AsInteger :=
+            DM.FDQuery.FieldByName('CODIGO').AsInteger;
+          DataSet.FieldByName('Descricao').AsString :=
+            DM.FDQuery.FieldByName('DESCRICAO').AsString;
+          DataSet.FieldByName('Quantidade').AsFloat :=
+            DM.FDQuery.FieldByName('QUANTIDADE').AsFloat;
+          DataSet.FieldByName('ValorUnit').AsFloat :=
+            DM.FDQuery.FieldByName('VALOR_UNIT').AsFloat;
+          DataSet.FieldByName('ValorTotal').AsFloat :=
+            DM.FDQuery.FieldByName('VALOR_TOTAL').AsFloat;
+          DM.FDQuery.Next;
         end;
       end;
-      Result := FPedido;
     end
     else
       raise Exception.Create('Pedido não encontrado!');
   finally
-    FPedido.DisposeOf;
     FItensPedido.DisposeOf;
   end;
 end;
 
 constructor TDaoPedido.Create;
 begin
-  FConexao := TDM.Create(nil);
+  DM := TDM.Create(nil);
 end;
 
 procedure TDaoPedido.GravarPedido(pedido: TModelPedido);
@@ -85,39 +92,38 @@ var
   SQL: String;
   I: Integer;
 begin
-  FConexao.StartTransaction;
+  DM.StartTransaction;
   try
     SQL := 'INSERT INTO PEDIDO VALUES (?,?,?,?)';
-    FConexao.PrepareStatement(SQL);
-    FConexao.SetValue(0, pedido.Codigo);
-    FConexao.SetValue(1, pedido.DataEmissao);
-    FConexao.SetValue(2, pedido.CodigoCliente);
-    FConexao.SetValue(3, pedido.Total);
-    FConexao.ExecSQL;
+    DM.PrepareStatement(SQL);
+    DM.SetValue(0, pedido.Codigo);
+    DM.SetValue(1, pedido.DataEmissao);
+    DM.SetValue(2, pedido.CodigoCliente);
+    DM.SetValue(3, pedido.Total);
+    DM.ExecSQL;
     SQL := '';
 
     for I := 0 to Pred(pedido.ItensPedido.Count) do
     begin
       SQL := 'INSERT INTO PEDIDO_DETALHE (CODIGO_PEDIDO, CODIGO_PRODUTO, '+
         'QUANTIDADE, VALOR_UNIT, VALOR_TOTAL) VALUES (?,?,?,?,?)';
-      FConexao.PrepareStatement(SQL);
-      FConexao.SetValue(0, pedido.itensPedido[I].CodigoPedido);
-      FConexao.SetValue(1, pedido.itensPedido[I].CodigoProduto);
-      FConexao.SetValue(2, pedido.itensPedido[I].Quantidade);
-      FConexao.SetValue(3, pedido.itensPedido[I].ValorUnit);
-      FConexao.SetValue(4, pedido.itensPedido[I].ValorTotal);
-      FConexao.ExecSQL
+      DM.PrepareStatement(SQL);
+      DM.SetValue(0, pedido.itensPedido[I].CodigoPedido);
+      DM.SetValue(1, pedido.itensPedido[I].CodigoProduto);
+      DM.SetValue(2, pedido.itensPedido[I].Quantidade);
+      DM.SetValue(3, pedido.itensPedido[I].ValorUnit);
+      DM.SetValue(4, pedido.itensPedido[I].ValorTotal);
+      DM.ExecSQL
     end;
-    FConexao.Commit;
-    DM.cdsDetPedido.EmptyDataSet;
+    DM.Commit;
   except
-    FConexao.RollBack;
+    DM.RollBack;
   end;
 end;
 
 destructor TDaoPedido.Destroy;
 begin
-  FConexao.DisposeOf;
+  DM.DisposeOf;
   inherited;
 end;
 
@@ -125,20 +131,20 @@ procedure TDaoPedido.ExcluirPedido(codigo: Integer);
 var
   SQL: String;
 begin
-  FConexao.StartTransaction;
+  DM.StartTransaction;
   try
     SQL := 'DELETE FROM PEDIDO_DETALHE WHERE CODIGO_PEDIDO = ?';
-    FConexao.PrepareStatement(SQL);
-    FConexao.SetValue(0, codigo);
-    FConexao.ExecSQL;
+    DM.PrepareStatement(SQL);
+    DM.SetValue(0, codigo);
+    DM.ExecSQL;
     SQL := '';
     SQL := 'DELETE FROM PEDIDO WHERE CODIGO = ?';
-    FConexao.PrepareStatement(SQL);
-    FConexao.SetValue(0, codigo);
-    FConexao.ExecSQL;
-    FConexao.Commit;
+    DM.PrepareStatement(SQL);
+    DM.SetValue(0, codigo);
+    DM.ExecSQL;
+    DM.Commit;
   except
-    FConexao.RollBack;
+    DM.RollBack;
   end;
 end;
 

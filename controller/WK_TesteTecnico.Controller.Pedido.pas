@@ -6,7 +6,8 @@ uses
   WK_TesteTecnico.Controller.Interfaces,
   WK_TesteTecnico.Model.Produto,
   WK_TesteTecnico.Model.Pedido,
-  WK_TesteTecnico.DAO.Pedido;
+  WK_TesteTecnico.DAO.Pedido,
+  Data.DB;
 
 type
   TControllerPedido = class(TInterfacedObject, iControllerPedido)
@@ -17,8 +18,8 @@ type
       Destructor Destroy; override;
       procedure GravarPedido(Pedido: TModelPedido);
       function NovoPedido(): Integer;
-      function BuscarPedido(codigo: Integer): TModelPedido;
-      procedure ExcluirPedido(codigo : Integer);
+      procedure BuscarPedido(pedido: TModelPedido; DataSet : TDataSet);
+      procedure ExcluirPedido(codigo: Integer);
   end;
 
 implementation
@@ -28,11 +29,11 @@ uses
 
 { TControllerPedido }
 
-function TControllerPedido.BuscarPedido(codigo: Integer): TModelPedido;
+procedure TControllerPedido.BuscarPedido(pedido: TModelPedido; DataSet: TDataSet);
 begin
   FDaoPedido := TDaoPedido.Create;
   try
-    Result := FDaoPedido.BuscarPedido(codigo);
+    FDaoPedido.BuscarPedido(pedido, DataSet );
   finally
     FDaoPedido.DisposeOf;
   end;
@@ -48,7 +49,6 @@ begin
 
   inherited;
 end;
-
 
 procedure TControllerPedido.ExcluirPedido(codigo: Integer);
 begin

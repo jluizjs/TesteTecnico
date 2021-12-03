@@ -20,48 +20,7 @@ object DM: TDM
   end
   object FDQuery: TFDQuery
     Connection = FDConnection
-    Left = 224
-    Top = 64
-  end
-  object cdsDetPedido: TClientDataSet
-    Aggregates = <>
-    Params = <>
-    ProviderName = 'DataSetProvider1'
-    OnCalcFields = cdsDetPedidoCalcFields
-    Left = 24
+    Left = 16
     Top = 120
-    object cdsDetPedidoCodigo: TIntegerField
-      FieldName = 'Codigo'
-    end
-    object cdsDetPedidoDescricao: TStringField
-      FieldName = 'Descricao'
-      Size = 100
-    end
-    object cdsDetPedidoValorUnit: TFloatField
-      FieldName = 'ValorUnit'
-    end
-    object cdsDetPedidoQuantidade: TFloatField
-      FieldName = 'Quantidade'
-    end
-    object cdsDetPedidoValorTotal: TFloatField
-      FieldKind = fkCalculated
-      FieldName = 'ValorTotal'
-      Calculated = True
-    end
-  end
-  object dspItensPedido: TDataSetProvider
-    Left = 24
-    Top = 168
-  end
-  object FDMemTable1: TFDMemTable
-    FetchOptions.AssignedValues = [evMode]
-    FetchOptions.Mode = fmAll
-    ResourceOptions.AssignedValues = [rvSilentMode]
-    ResourceOptions.SilentMode = True
-    UpdateOptions.AssignedValues = [uvCheckRequired, uvAutoCommitUpdates]
-    UpdateOptions.CheckRequired = False
-    UpdateOptions.AutoCommitUpdates = True
-    Left = 224
-    Top = 112
   end
 end

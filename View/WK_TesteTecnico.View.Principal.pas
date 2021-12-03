@@ -22,7 +22,8 @@ uses
   WK_TesteTecnico.Controller.Produto,
   WK_TesteTecnico.Controller.Pedido,
   WK_TesteTecnico.Model.Produto,
-  WK_TesteTecnico.Model.Pedido, WK_TesteTecnico.Model.ItensPedido;
+  WK_TesteTecnico.Model.Pedido,
+  WK_TesteTecnico.Model.ItensPedido, Datasnap.Provider, Datasnap.DBClient;
 
 type
   TfrmPrincipal = class(TForm)
@@ -52,6 +53,14 @@ type
     lblCodigoCliente: TLabel;
     lblCodigoPedido: TLabel;
     lblTotalPedido: TLabel;
+    cdsDetPedido: TClientDataSet;
+    cdsDetPedidoCodigo: TIntegerField;
+    cdsDetPedidoDescricao: TStringField;
+    cdsDetPedidoValorUnit: TFloatField;
+    cdsDetPedidoQuantidade: TFloatField;
+    cdsDetPedidoValorTotal: TFloatField;
+    dspItensPedido: TDataSetProvider;
+    btnCancelarPedido: TButton;
     procedure btnInserirItemClick(Sender: TObject);
     procedure dbgDetPedidoKeyPress(Sender: TObject; var Key: Char);
     procedure btnSairClick(Sender: TObject);
@@ -63,6 +72,9 @@ type
     procedure btnGravarPedidoClick(Sender: TObject);
     procedure btnBuscarPedidoClick(Sender: TObject);
     procedure btnExcluirPedidoClick(Sender: TObject);
+    procedure cdsDetPedidoCalcFields(DataSet: TDataSet);
+    procedure FormCreate(Sender: TObject);
+    procedure btnCancelarPedidoClick(Sender: TObject);
   private
     { Private declarations }
     FControllerCliente: TControllerCliente;
@@ -91,14 +103,19 @@ var
 
 implementation
 
-{$R *.dfm}
 
-uses
-  WK_TesteTecnico.Model.DM;
+{$R *.dfm}
 
 procedure TfrmPrincipal.btnBuscarPedidoClick(Sender: TObject);
 begin
   BuscarPedido;
+end;
+
+procedure TfrmPrincipal.btnCancelarPedidoClick(Sender: TObject);
+begin
+  if (Application.MessageBox('Confirma Cancelamento?','Mensagem do Sistema',
+    MB_ICONQUESTION+MB_YESNO)=mrYes) then
+    FinalizarPedido;
 end;
 
 procedure TfrmPrincipal.btnExcluirPedidoClick(Sender: TObject);
@@ -121,12 +138,14 @@ begin
     ShowMessage(E.Message);
   end;
   LimparCamposItem();
+  edtCodigoProduto.SetFocus;
 end;
 
 procedure TfrmPrincipal.btnNovoPedidoClick(Sender: TObject);
 var
   codigo: Integer;
 begin
+  FinalizarPedido;
   FControllerCliente := TControllerCliente.Create;
   FControllerPedido := TControllerPedido.Create;
   try
@@ -175,6 +194,13 @@ begin
   lblTotalPedido.Caption := soma.ToString;
 end;
 
+procedure TfrmPrincipal.cdsDetPedidoCalcFields(DataSet: TDataSet);
+begin
+  cdsDetPedido.FieldByName('ValorTotal').AsFloat :=
+    cdsDetPedido.FieldByName('ValorUnit').AsFloat*
+    cdsDetPedido.FieldByName('Quantidade').AsFloat;
+end;
+
 procedure TfrmPrincipal.dbgDetPedidoKeyPress(Sender: TObject; var Key: Char);
 begin
   if Key = #13 then
@@ -216,8 +242,11 @@ begin
   lblCodigoPedido.Caption := '';
   lblTotalPedido.Caption := '';
   pnlProduto.Enabled := False;
+  btnGravarPedido.Enabled := False;
+  btnCancelarPedido.Enabled := False;
   btnExcluirPedido.Enabled := True;
   btnBuscarPedido.Enabled := True;
+  cdsDetPedido.EmptyDataSet;
 end;
 
 procedure TfrmPrincipal.EditarItemPedido;
@@ -249,6 +278,8 @@ end;
 procedure TfrmPrincipal.BloqueioInsertPedido;
 begin
   pnlProduto.Enabled := True;
+  btnGravarPedido.Enabled := True;
+  btnCancelarPedido.Enabled := True;
   btnBuscarPedido.Enabled := False;
   btnExcluirPedido.Enabled := False;
 end;
@@ -272,18 +303,28 @@ procedure TfrmPrincipal.BuscarPedido;
 var
   I: Integer;
 begin
-  FControllerPedido := TControllerPedido.Create;
   FPedido := TModelPedido.Create;
+  FControllerPedido := TControllerPedido.Create;
+  FControllerCliente := TControllerCliente.Create;
   try
-    FPedido := FControllerPedido.BuscarPedido(StrToInt(InputBox('Buscar Pedido', 'Código do Pedido:', '0')));
-    ShowMessage(FPedido.codigo.ToString);
-    for I := 0 to Pred(FPedido.ItensPedido.Count) do
-    begin
-      ShowMessage(FPedido.ItensPedido[I].CodigoPedido.ToString);
-    end;
+    FinalizarPedido();
+    FPedido.Codigo := StrToInt(InputBox('Buscar Pedido', 'Código do Pedido:', '0'));
+    FControllerPedido.BuscarPedido(FPedido, dsDetPedido.DataSet);
+    lblCodigoPedido.Caption := FPedido.Codigo.ToString;
+    lblCodigoCliente.Caption := FPedido.CodigoCliente.ToString;
+    lblNomeCliente.Caption := FControllerCliente.BuscarCliente(FPedido.CodigoCliente);
+    lblTotalPedido.Caption := FPedido.Total.ToString;
   finally
     FControllerPedido.DisposeOf;
+    FControllerCliente.DisposeOf;
+    FPedido.DisposeOf;
   end;
+end;
+
+procedure TfrmPrincipal.FormCreate(Sender: TObject);
+begin
+  cdsDetPedido.CreateDataSet;
+  cdsDetPedido.Active := True;
 end;
 
 procedure TfrmPrincipal.FormKeyDown(Sender: TObject; var Key: Word;
@@ -377,7 +418,6 @@ begin
   edtDescricaoProduto.Clear;
   edtQuantidadeProduto.Text := '1';
   edtValorUnitProduto.Clear;
-  edtCodigoProduto.SetFocus;
 end;
 
 end.

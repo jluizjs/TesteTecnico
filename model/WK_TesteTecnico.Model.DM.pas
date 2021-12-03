@@ -32,16 +32,7 @@ type
     FDConnection: TFDConnection;
     FDPhysMySQLDriverLink1: TFDPhysMySQLDriverLink;
     FDQuery: TFDQuery;
-    cdsDetPedido: TClientDataSet;
-    dspItensPedido: TDataSetProvider;
-    FDMemTable1: TFDMemTable;
-    cdsDetPedidoValorUnit: TFloatField;
-    cdsDetPedidoQuantidade: TFloatField;
-    cdsDetPedidoValorTotal: TFloatField;
-    cdsDetPedidoCodigo: TIntegerField;
-    cdsDetPedidoDescricao: TStringField;
     procedure DataModuleCreate(Sender: TObject);
-    procedure cdsDetPedidoCalcFields(DataSet: TDataSet);
   private
     { Private declarations }
   public
@@ -52,7 +43,6 @@ type
     procedure StartTransaction;
     procedure Commit;
     procedure RollBack;
-
   end;
 
 var
@@ -64,13 +54,6 @@ implementation
 
 {$R *.dfm}
 
-procedure TDM.cdsDetPedidoCalcFields(DataSet: TDataSet);
-begin
-  cdsDetPedido.FieldByName('ValorTotal').AsFloat :=
-    cdsDetPedido.FieldByName('ValorUnit').AsFloat*
-    cdsDetPedido.FieldByName('Quantidade').AsFloat;
-end;
-
 procedure TDM.Commit;
 begin
   FDConnection.Commit;
@@ -78,8 +61,6 @@ end;
 
 procedure TDM.DataModuleCreate(Sender: TObject);
 begin
-  cdsDetPedido.CreateDataSet;
-  cdsDetPedido.Active := True;
   FDConnection.Connected := False;
   FDConnection.Params.Add('DriverID=MYSQL');
   FDConnection.Params.Add('Database=wk_testetecnico');

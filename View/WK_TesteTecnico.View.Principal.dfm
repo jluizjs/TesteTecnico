@@ -12,6 +12,7 @@ object frmPrincipal: TfrmPrincipal
   Font.Style = []
   KeyPreview = True
   OldCreateOrder = False
+  OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   PixelsPerInch = 96
   TextHeight = 13
@@ -221,33 +222,37 @@ object frmPrincipal: TfrmPrincipal
       TabOrder = 2
       object btnGravarPedido: TButton
         Left = 1
-        Top = 26
+        Top = 51
         Width = 183
         Height = 25
         Align = alTop
         Caption = 'Gravar Pedido'
+        Enabled = False
         TabOrder = 0
         OnClick = btnGravarPedidoClick
+        ExplicitTop = 26
       end
       object btnBuscarPedido: TButton
         Left = 1
-        Top = 51
+        Top = 76
         Width = 183
         Height = 25
         Align = alTop
         Caption = 'Buscar Pedido'
         TabOrder = 1
         OnClick = btnBuscarPedidoClick
+        ExplicitTop = 51
       end
       object btnExcluirPedido: TButton
         Left = 1
-        Top = 76
+        Top = 101
         Width = 183
         Height = 25
         Align = alTop
         Caption = 'Excluir Pedido'
         TabOrder = 2
         OnClick = btnExcluirPedidoClick
+        ExplicitTop = 76
       end
       object btnSair: TButton
         Left = 1
@@ -268,6 +273,18 @@ object frmPrincipal: TfrmPrincipal
         Caption = 'Novo Pedido'
         TabOrder = 4
         OnClick = btnNovoPedidoClick
+      end
+      object btnCancelarPedido: TButton
+        Left = 1
+        Top = 26
+        Width = 183
+        Height = 25
+        Align = alTop
+        Caption = 'Cancelar Pedido'
+        Enabled = False
+        TabOrder = 5
+        OnClick = btnCancelarPedidoClick
+        ExplicitTop = 20
       end
     end
     object TPanel
@@ -327,8 +344,43 @@ object frmPrincipal: TfrmPrincipal
     end
   end
   object dsDetPedido: TDataSource
-    DataSet = DM.cdsDetPedido
+    DataSet = cdsDetPedido
     Left = 22
     Top = 161
+  end
+  object cdsDetPedido: TClientDataSet
+    Aggregates = <>
+    Params = <>
+    ProviderName = 'DataSetProvider1'
+    OnCalcFields = cdsDetPedidoCalcFields
+    Left = 24
+    Top = 208
+    object cdsDetPedidoCodigo: TIntegerField
+      FieldName = 'Codigo'
+    end
+    object cdsDetPedidoDescricao: TStringField
+      FieldName = 'Descricao'
+      Size = 100
+    end
+    object cdsDetPedidoValorUnit: TFloatField
+      FieldName = 'ValorUnit'
+      DisplayFormat = '#.00'
+    end
+    object cdsDetPedidoQuantidade: TFloatField
+      FieldName = 'Quantidade'
+      DisplayFormat = '#.000'
+      currency = True
+    end
+    object cdsDetPedidoValorTotal: TFloatField
+      FieldKind = fkCalculated
+      FieldName = 'ValorTotal'
+      DisplayFormat = '#.00'
+      currency = True
+      Calculated = True
+    end
+  end
+  object dspItensPedido: TDataSetProvider
+    Left = 24
+    Top = 256
   end
 end
