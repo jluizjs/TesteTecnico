@@ -20,7 +20,7 @@ object DM: TDM
   end
   object FDQuery: TFDQuery
     Connection = FDConnection
-    Left = 16
-    Top = 120
+    Left = 24
+    Top = 128
   end
 end
